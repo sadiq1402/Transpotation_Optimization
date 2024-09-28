@@ -26,3 +26,6 @@ The current public transportation systems often suffer from inefficient scheduli
 - **Libraries/Frameworks**: 
   - Machine Learning libraries (e.g., `scikit-learn`, `pandas`, etc.)
   - Data visualization tools (e.g., `matplotlib`)
+  - Frontend : React
+  - Backend : Flask
+  - 3D Model : Spline
