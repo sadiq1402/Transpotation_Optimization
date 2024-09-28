@@ -1,70 +1,22 @@
-# Getting Started with Create React App
+# Optimizing Public Transportation Efficiency
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is developed as part of the **BuzzOnEarth India Hackathon 2024**. The goal of this project is to design an AI-based system that optimizes public transportation schedules and routes to reduce fuel consumption, minimize carbon emissions, and improve the convenience of city residents.
 
-## Available Scripts
+## Problem Statement
 
-In the project directory, you can run:
+**Objective**:  
+The current public transportation systems often suffer from inefficient scheduling and route planning, leading to overcrowded buses, traffic delays, and increased carbon emissions. This project aims to build an AI-based solution to optimize these systems by dynamically adjusting schedules and routes based on traffic conditions, fuel consumption, and passenger convenience.
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **AI-based Route Optimization**: Dynamically adjusts public transportation routes in real-time based on traffic patterns.
+- **Fuel Efficiency**: Reduces unnecessary trips, leading to lower fuel consumption and reduced carbon emissions.
+- **Passenger Convenience**: Minimizes waiting times and ensures better route coverage for city residents.
+- **Sustainable Transportation**: Promotes eco-friendly solutions and reduces urban air pollution.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Tech Stack
 
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- **Programming Language**: Python
+- **Libraries/Frameworks**: 
+  - Machine Learning libraries (e.g., `scikit-learn`, `pandas`, etc.)
+  - Data visualization tools (e.g., `matplotlib`)
