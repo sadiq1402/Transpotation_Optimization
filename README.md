@@ -22,7 +22,7 @@ The current public transportation systems often suffer from inefficient scheduli
 
 ## Tech Stack
 
-- **Programming Language**: Python
+- **Programming Language**: Python, JavaScript
 - **Libraries/Frameworks**: 
   - Machine Learning libraries (e.g., `scikit-learn`, `pandas`, etc.)
   - Data visualization tools (e.g., `matplotlib`)
