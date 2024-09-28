@@ -3,23 +3,25 @@ import pandas as pd
 import folium
 from folium.plugins import HeatMap, MarkerCluster
 from shapely.geometry import Point
-
+from flask_cors import CORS
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
-
+import numpy as np
 from shapely.geometry import Point, Polygon, MultiPolygon
+import os
 
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 
+import matplotlib
+matplotlib.use('Agg')  # Use non-GUI backend to avoid MacOS threading error
 
 app = Flask(__name__)
-
+CORS(app)
 
 def modify_time(row):
-#     print(row)
     if type(row) is not float: 
         time_parts = row.split(":")
         time_parts[0] = str(int(time_parts[0]) % 24)
@@ -43,7 +45,7 @@ def classify_time_of_day(hour):
 
 
 def load_and_clean_data():
-    filename = "data/mta_1712.csv"
+    filename = "/Users/suyash/frontend/app/mta_1712.csv"
     raw_df = pd.read_csv(filename, on_bad_lines="skip")
     data_df_0 = raw_df.dropna(subset=['OriginName', 'NextStopPointName']).reset_index(drop=True)
 
@@ -56,8 +58,7 @@ def load_and_clean_data():
     data_df_0['ExpectedArrivalTime'] = pd.to_datetime(data_df_0.ExpectedArrivalTime, errors='coerce')
     data_df_0['ModifiedScheduledTime'] = pd.to_datetime(data_df_0.ModifiedScheduledTime, errors='coerce')
 
-    data_df_0['ExpectedArrivalTime'].fillna(data_df_0['ModifiedScheduledTime'], inplace=True)
-    # Drop the null values from ModifiedScheduledTime
+    data_df_0['ExpectedArrivalTime'] = data_df_0['ExpectedArrivalTime'].fillna(data_df_0['ModifiedScheduledTime'])
     data_df_0.dropna(subset=['ModifiedScheduledTime'], inplace=True)
 
     data0 = data_df_0.copy()
@@ -76,8 +77,6 @@ def load_and_clean_data():
     
     lower_bound = Q1 - 1.5 * IQR
     upper_bound = Q3 + 1.5 * IQR
-    
-    # print(f"Q1: {Q1}, Q3: {Q3}, IQR: {IQR}, lower bound: {lower_bound}, upper bound: {upper_bound}")
 
     data_df = data0[(data0['Delay'] >= lower_bound) & (data0['Delay'] <= upper_bound)]
     
@@ -115,12 +114,18 @@ def delayed_origins_heatmap():
         AvgDelay=('Delay', 'mean'),
         TotalTrips=('VehicleRef', 'count')
     ).reset_index().sort_values(by='AvgDelay', ascending=False).head(10)
-    
-    m = folium.Map(location=[40.7128, -74.0060], zoom_start=12)
-    HeatMap(most_imp_origins[['OriginLat', 'OriginLong', 'AvgDelay']].values, radius=10).add_to(m)
-    m.save('static/heatmap.html')
-    
-    return jsonify({'message': 'Heatmap created', 'path': '/static/heatmap.html'})
+
+    # Check if the required columns exist
+    if 'OriginLat' in most_imp_origins.columns and 'OriginLong' in most_imp_origins.columns:
+        m = folium.Map(location=[40.7128, -74.0060], zoom_start=12)
+        HeatMap(most_imp_origins[['OriginLat', 'OriginLong', 'AvgDelay']].values, radius=10).add_to(m)
+        m.save('static/heatmap.html')
+
+        return jsonify({'message': 'Heatmap created', 'path': '/static/heatmap.html'})
+    else:
+        # Handle the case where the columns are missing
+        return jsonify({"error": "Columns 'OriginLat' and 'OriginLong' are missing from the data."}), 400
+
 
 @app.route('/trips', methods=['GET'])
 def get_trips():
