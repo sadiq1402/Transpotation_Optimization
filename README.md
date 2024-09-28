@@ -1,4 +1,10 @@
-# Optimizing Public Transportation Efficiency
+# TokenTitans - Optimizing Public Transportation Efficiency
+
+## Team Members:
+- **Suyash Srivastav**  
+- **Yadvendra Garg**  
+- **Arpit Mishra**  
+- **Md Sadiq Hasan Ansari**
 
 This project is developed as part of the **BuzzOnEarth India Hackathon 2024**. The goal of this project is to design an AI-based system that optimizes public transportation schedules and routes to reduce fuel consumption, minimize carbon emissions, and improve the convenience of city residents.
 
