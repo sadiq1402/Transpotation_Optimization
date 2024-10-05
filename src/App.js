@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "leaflet/dist/leaflet.css";
-// import ChatBotModal from "./ChatBotModal";
 import {
     Box,
     Flex,
@@ -12,17 +11,10 @@ import {
     GridItem,
     Button,
     VStack,
-    Table,
-    Thead,
-    Tbody,
-    Tr,
-    Th,
-    Td,
 } from "@chakra-ui/react";
-import { FaTachometerAlt, FaRoute } from "react-icons/fa";
+import { FaTachometerAlt } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import OptimizationRoute from "./components/OptimizationRoute";
 
 // Fix for Leaflet's default icon not showing up
 delete L.Icon.Default.prototype._getIconUrl;
@@ -44,27 +36,11 @@ function App() {
         userSatisfaction: "4.8/5",
     });
 
-    // API-related states
-    const [routeAnalysisData, setRouteAnalysisData] = useState([]);
-    const [imageUrl, setImageUrl] = useState("");
-
-    const [loading, setLoading] = useState(true);
-
-    // Pagination states
-    const [currentPage, setCurrentPage] = useState(1);
-    const routesPerPage = 10;
-    const indexOfLastRoute = currentPage * routesPerPage;
-    const indexOfFirstRoute = indexOfLastRoute - routesPerPage;
-    const currentRoutes = routeAnalysisData.slice(
-        indexOfFirstRoute,
-        indexOfLastRoute
-    );
-    const totalPages = Math.ceil(routeAnalysisData.length / routesPerPage);
+    const [activeView, setActiveView] = useState("overview");
 
     // Coordinates for New York and Kanpur
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
-        Kanpur: [26.4499, 80.3319],
     };
 
     // Update time every second
@@ -74,39 +50,6 @@ function App() {
         }, 1000);
         return () => clearInterval(timer);
     }, []);
-
-    // Fetch route analysis data from Flask API
-    useEffect(() => {
-        const fetchRouteAnalysis = async () => {
-            try {
-                const response = await axios.get(
-                    "http://127.0.0.1:5000/route-analysis"
-                );
-                setRouteAnalysisData(response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching route analysis data", error);
-                setLoading(false);
-            }
-        };
-        fetchRouteAnalysis();
-    }, []);
-
-    // Pagination controls
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
-
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
-
-    // optimization route
-    const [activeView, setActiveView] = useState("overview");
 
     return (
         <Flex>
@@ -130,20 +73,12 @@ function App() {
                     >
                         Fetch Delay Distribution
                     </Button>
-                    <Button
-                        onClick={() => setActiveView("optimization")}
-                        colorScheme="teal"
-                        size="sm"
-                        mt={2}
-                    >
-                        Optimization Route
-                    </Button>
                 </VStack>
             </Box>
 
             {/* Main Content */}
             <Box w="84%" p={6}>
-                {activeView === "overview" ? (
+                {activeView === "overview" && (
                     <>
                         <Flex justify="space-between" align="center" mb={6}>
                             <Heading size="lg">
@@ -209,61 +144,9 @@ function App() {
                                 </Text>
                             </GridItem>
                         </Grid>
-
-                        {/* Route Analysis Table */}
-                        <Heading size="md" mt={6}>
-                            Route Analysis
-                        </Heading>
-                        {loading ? (
-                            <Text>Loading...</Text>
-                        ) : (
-                            <Table variant="striped" colorScheme="gray" mt={4}>
-                                <Thead>
-                                    <Tr>
-                                        <Th>Route</Th>
-                                        <Th>Delay (min)</Th>
-                                        <Th>Distance (km)</Th>
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {currentRoutes.map((route, index) => (
-                                        <Tr key={index}>
-                                            <Td>{route.PublishedLineName}</Td>
-                                            <Td>
-                                                {route.AvgDelays.toFixed(2)}
-                                            </Td>
-                                            <Td>{route.TotalTrips}</Td>
-                                        </Tr>
-                                    ))}
-                                </Tbody>
-                            </Table>
-                        )}
-
-                        {/* Pagination Controls */}
-                        <Flex justify="space-between" align="center" mt={4}>
-                            <Button
-                                onClick={handlePrevPage}
-                                disabled={currentPage === 1}
-                            >
-                                Previous
-                            </Button>
-                            <Text>
-                                Page {currentPage} of {totalPages}
-                            </Text>
-                            <Button
-                                onClick={handleNextPage}
-                                disabled={currentPage === totalPages}
-                            >
-                                Next
-                            </Button>
-                        </Flex>
-
-                        {/* Delay Distribution Image */}
                     </>
-                ) : (
-                    <OptimizationRoute />
                 )}
-            </Box>
+            </Box>           
         </Flex>
     );
 }

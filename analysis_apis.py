@@ -34,7 +34,7 @@ import gtfs_kit as gk
 app = Flask(__name__)
 CORS(app)
 
-path = Path('.\data\gtfs-nyc-2023.zip')
+path = Path('data/gtfs-nyc-2023.zip')
 feed = gk.read_feed(path, dist_units='km')
 # print(feed.validate())
 
