@@ -22,8 +22,7 @@ import {
 import { FaTachometerAlt, FaRoute } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import Home from "./Home";
-import OptimizationRoute from "./OptimizationRoute";
+import OptimizationRoute from "./components/OptimizationRoute";
 
 // Fix for Leaflet's default icon not showing up
 delete L.Icon.Default.prototype._getIconUrl;
