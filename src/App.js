@@ -15,13 +15,14 @@ import {
 import { FaTachometerAlt } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import RoutesModal from './components/RoutesModal'; // Import the RoutesModal component
+import RoutesModal from './components/RoutesModal';
+import TripsModal from './components/TripsModal'; // Import TripsModal
+import StopsModal from './components/StopsModal'; // Import StopsModal
+import CalendarDatesModal from './components/CalendarDatesModal'; // Import CalendarDatesModal
 
-// Fix for Leaflet's default icon not showing up
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl:
-        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
     shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -36,7 +37,10 @@ function App() {
         userSatisfaction: "4.8/5",
     });
     const [activeView, setActiveView] = useState("overview");
-    const [isRoutesModalOpen, setIsRoutesModalOpen] = useState(false); // Modal state
+    const [isRoutesModalOpen, setIsRoutesModalOpen] = useState(false);
+    const [isTripsModalOpen, setIsTripsModalOpen] = useState(false); // Modal state for Trips
+    const [isStopsModalOpen, setIsStopsModalOpen] = useState(false); // Modal state for Stops
+    const [isCalendarDatesModalOpen, setIsCalendarDatesModalOpen] = useState(false); // Modal state for Calendar Dates
 
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
@@ -67,12 +71,36 @@ function App() {
                         Fetch Delay Distribution
                     </Button>
                     <Button
-                        onClick={() => setIsRoutesModalOpen(true)} // Open RoutesModal
+                        onClick={() => setIsRoutesModalOpen(true)} 
                         colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
                         View Routes
+                    </Button>
+                    <Button
+                        onClick={() => setIsTripsModalOpen(true)} // Open TripsModal
+                        colorScheme="green"
+                        size="sm"
+                        mt={2}
+                    >
+                        View Trips
+                    </Button>
+                    <Button
+                        onClick={() => setIsStopsModalOpen(true)} // Open StopsModal
+                        colorScheme="purple"
+                        size="sm"
+                        mt={2}
+                    >
+                        View Stops
+                    </Button>
+                    <Button
+                        onClick={() => setIsCalendarDatesModalOpen(true)} // Open CalendarDatesModal
+                        colorScheme="orange"
+                        size="sm"
+                        mt={2}
+                    >
+                        View Calendar Dates
                     </Button>
                 </VStack>
             </Box>
@@ -123,8 +151,27 @@ function App() {
                         </Grid>
                     </>
                 )}
-                {isRoutesModalOpen && <RoutesModal />} {/* Display RoutesModal */}
-            </Box>           
+
+                {/* RoutesModal */}
+                {isRoutesModalOpen && (
+                    <RoutesModal onClose={() => setIsRoutesModalOpen(false)} />
+                )}
+
+                {/* TripsModal */}
+                {isTripsModalOpen && (
+                    <TripsModal onClose={() => setIsTripsModalOpen(false)} />  // Pass onClose handler
+                )}
+
+                {/* StopsModal */}
+                {isStopsModalOpen && (
+                    <StopsModal onClose={() => setIsStopsModalOpen(false)} />  // Pass onClose handler
+                )}
+
+                {/* CalendarDatesModal */}
+                {isCalendarDatesModalOpen && (
+                    <CalendarDatesModal onClose={() => setIsCalendarDatesModalOpen(false)} /> // Pass onClose handler
+                )}
+            </Box>
         </Flex>
     );
 }
