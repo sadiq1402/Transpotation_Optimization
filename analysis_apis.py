@@ -209,7 +209,7 @@ def get_route_stats():
 
     # Compute route_stats for the specific date
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
-    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']])
+    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']], on='route_id', how='left')
 
     # Convert route_stats DataFrame to JSON and return it
     route_stats_json = route_stats.to_dict(orient='records')
@@ -366,7 +366,7 @@ def get_peak_hour_traffic():
     trip_stats = feed.compute_trip_stats()
 
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
-    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']])
+    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']],on='route_id', how='left')
 
     trip_stats['time_of_day'] = trip_stats['start_time'].apply(classify_time_of_day)
     trip_stats['time_period'] = trip_stats['start_time'].apply(classify_time_period)
