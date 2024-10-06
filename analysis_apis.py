@@ -11,11 +11,11 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingClassifier
-from sklearn.cluster import KMeans
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 
+# Intel Modin Integration for Faster Data Manipulation
+import modin.pandas as pd
+
+# Data Visualization Library
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
@@ -23,11 +23,21 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from plotly.subplots import make_subplots
 
+# Map Visualization Library
 import folium
 from shapely.geometry import LineString, Point
 from folium.plugins import MarkerCluster, HeatMap
 from folium import Marker, Icon, Circle, CircleMarker, GeoJson, PolyLine, Map
 from geopy.distance import geodesic
+
+# Intel extension for scikit-learn for optimized ML Tasks 
+from sklearnex import patch_sklearn
+patch_sklearn()
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingClassifier
+from sklearn.cluster import KMeans
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 import gtfs_kit as gk
 
