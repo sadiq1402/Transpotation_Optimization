@@ -1,104 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
     Box,
     Button,
-    VStack,
-    HStack,
-    Text,
-    useToast,
+    Select,
     Table,
-    Thead,
     Tbody,
-    Tr,
-    Th,
     Td,
-    Menu,
-    MenuButton,
-    MenuList,
-    MenuItem,
-    MenuDivider,
+    Th,
+    Thead,
+    Tr,
+    useToast,
+    Spinner,
+    Text,
 } from "@chakra-ui/react";
-import { ChevronDownIcon } from "@chakra-ui/icons";
-
-const STOPS_PER_PAGE = 20;
-
-// Helper function to safely format numbers
-const safeNumberFormat = (number, decimals = 2) => {
-    if (number === null || number === undefined || isNaN(number)) {
-        return "N/A";
-    }
-    return Number(number).toFixed(decimals);
-};
-
-const PaginatedDropdown = ({ options, value, onChange, placeholder }) => {
-    const [currentPage, setCurrentPage] = useState(0);
-    const totalPages = Math.ceil((options?.length || 0) / STOPS_PER_PAGE);
-
-    const getCurrentPageOptions = () => {
-        if (!Array.isArray(options)) return [];
-        const start = currentPage * STOPS_PER_PAGE;
-        return options.slice(start, start + STOPS_PER_PAGE);
-    };
-
-    return (
-        <Menu>
-            <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-                {value || placeholder}
-            </MenuButton>
-            <MenuList maxHeight="300px" overflow="auto">
-                {getCurrentPageOptions().map((option, index) => (
-                    <MenuItem key={index} onClick={() => onChange(option)}>
-                        {option}
-                    </MenuItem>
-                ))}
-                {options?.length > 0 && (
-                    <>
-                        <MenuDivider />
-                        <Box p={2}>
-                            <HStack justify="space-between">
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        setCurrentPage((prev) =>
-                                            Math.max(0, prev - 1)
-                                        )
-                                    }
-                                    isDisabled={currentPage === 0}
-                                >
-                                    Previous
-                                </Button>
-                                <Text>
-                                    Page {currentPage + 1} of {totalPages}
-                                </Text>
-                                <Button
-                                    size="sm"
-                                    onClick={() =>
-                                        setCurrentPage((prev) =>
-                                            Math.min(totalPages - 1, prev + 1)
-                                        )
-                                    }
-                                    isDisabled={currentPage === totalPages - 1}
-                                >
-                                    Next
-                                </Button>
-                            </HStack>
-                        </Box>
-                    </>
-                )}
-            </MenuList>
-        </Menu>
-    );
-};
 
 const TripPlanner = () => {
+    const [stops, setStops] = useState([]);
+    const [results, setResults] = useState({ trips_between_stops: [] });
     const [startStop, setStartStop] = useState("");
     const [endStop, setEndStop] = useState("");
-    const [stops, setStops] = useState([]);
-    const [availableTrips, setAvailableTrips] = useState(null);
-    const [selectedTrip, setSelectedTrip] = useState(null);
-    const [tripDetails, setTripDetails] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [fetchingStops, setFetchingStops] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
     const toast = useToast();
 
     useEffect(() => {
@@ -106,36 +29,31 @@ const TripPlanner = () => {
     }, []);
 
     const fetchStops = async () => {
-        setFetchingStops(true);
         try {
-            const response = await fetch("http://localhost:5000/stops");
-            const data = await response.json();
-            if (Array.isArray(data)) {
-                const stopNames = data
-                    .filter((stop) => stop && stop.stop_name)
-                    .map((stop) => stop.stop_name);
-                setStops(stopNames);
-            } else {
-                throw new Error("Invalid stops data received");
-            }
+            const response = await axios.get("http://127.0.0.1:5000/stops");
+            setStops(response.data || []);
         } catch (error) {
             toast({
-                title: "Error fetching stops",
-                description: error.message,
+                title: "Error",
+                description: "Failed to fetch stops",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-        } finally {
-            setFetchingStops(false);
         }
     };
 
-    const handleSearch = async () => {
+    const normalizeStopName = (stopName) => {
+        return stopName.trim().replace(/\s+/g, " ");
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
         if (!startStop || !endStop) {
             toast({
                 title: "Error",
-                description: "Please select both start and end stops",
+                description: "Please select both start and end stops.",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -143,218 +61,185 @@ const TripPlanner = () => {
             return;
         }
 
-        setLoading(true);
-        try {
-            const response = await fetch(
-                `http://localhost:5000/api/trips_between_stops?start_stop_name=${encodeURIComponent(
-                    startStop
-                )}&end_stop_name=${encodeURIComponent(endStop)}`
-            );
-            const data = await response.json();
+        setIsLoading(true);
 
-            if (response.ok && data.trips_between_stops) {
-                setAvailableTrips(data.trips_between_stops);
+        try {
+            const encodedStartStop = encodeURIComponent(
+                normalizeStopName(startStop)
+            ).replace(/%20/g, "%20");
+            const encodedEndStop = encodeURIComponent(
+                normalizeStopName(endStop)
+            ).replace(/%20/g, "%20");
+
+            const url = `http://127.0.0.1:5000/api/trips_between_stops?start_stop_name=${encodedStartStop}&end_stop_name=${encodedEndStop}`;
+
+            console.log("Requesting URL:", url);
+
+            const response = await axios.get(url);
+
+            if (response.data && response.data.trips_between_stops) {
+                setResults(response.data);
             } else {
-                throw new Error(data.error || "Failed to find trips");
+                setResults({ trips_between_stops: [] });
+                toast({
+                    title: "No Results",
+                    description: "No trips found between the selected stops.",
+                    status: "info",
+                    duration: 5000,
+                    isClosable: true,
+                });
             }
+            setCurrentPage(1);
         } catch (error) {
+            console.error("API Error:", error.response || error);
+            setResults({ trips_between_stops: [] });
+
+            const errorMessage =
+                error.response?.data?.error ||
+                "An error occurred while fetching trips.";
+
             toast({
                 title: "Error",
-                description: error.message,
+                description: errorMessage,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
-    const handleTripSelect = async (tripId) => {
-        setSelectedTrip(tripId);
-        setLoading(true);
-        try {
-            const response = await fetch(
-                `http://localhost:5000/api/routes_between_stops?trip_id=${tripId}`
+    const renderTableRows = () => {
+        if (!results.trips_between_stops?.length) {
+            return (
+                <Tr>
+                    <Td colSpan={4}>No trips found for the selected stops.</Td>
+                </Tr>
             );
-            const data = await response.json();
-
-            if (response.ok) {
-                setTripDetails(data);
-            } else {
-                throw new Error(data.error || "Failed to get trip details");
-            }
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: error.message,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-            setSelectedTrip(null);
-        } finally {
-            setLoading(false);
         }
+
+        const startIndex = (currentPage - 1) * 10;
+        const endIndex = startIndex + 10;
+        const pageTrips = results.trips_between_stops.slice(
+            startIndex,
+            endIndex
+        );
+
+        return pageTrips.map((trip, index) => (
+            <Tr key={index}>
+                <Td>
+                    <Box
+                        display="inline-block"
+                        width="20px"
+                        height="20px"
+                        backgroundColor={`#${trip.route_color || "FFFFFF"}`}
+                        marginRight={2}
+                    />
+                    {trip.route_short_name} - {trip.route_long_name}
+                </Td>
+                <Td>{trip.trip_id}</Td>
+                <Td>
+                    {trip.duration
+                        ? `${(trip.duration * 60).toFixed(0)} seconds`
+                        : "N/A"}
+                </Td>
+                <Td>
+                    {trip.distance ? `${trip.distance.toFixed(2)} km` : "N/A"}
+                </Td>
+            </Tr>
+        ));
     };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => prev + 1);
+    };
+
+    const handlePreviousPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const totalResults = results.total_results || 0;
+    const totalPages = Math.ceil(totalResults / 10);
 
     return (
-        <Box p={5}>
-            <VStack spacing={4} align="stretch">
-                <Text fontSize="2xl" fontWeight="bold">
-                    Trip Planner
+        <Box p={4}>
+            <form onSubmit={handleSubmit}>
+                <Select
+                    value={startStop}
+                    onChange={(e) => setStartStop(e.target.value)}
+                    placeholder="Select start stop"
+                    mb={4}
+                >
+                    {stops.map((stop) => (
+                        <option key={stop.stop_id} value={stop.stop_name}>
+                            {stop.stop_name}
+                        </option>
+                    ))}
+                </Select>
+
+                <Select
+                    value={endStop}
+                    onChange={(e) => setEndStop(e.target.value)}
+                    placeholder="Select end stop"
+                    mb={4}
+                >
+                    {stops.map((stop) => (
+                        <option key={stop.stop_id} value={stop.stop_name}>
+                            {stop.stop_name}
+                        </option>
+                    ))}
+                </Select>
+
+                <Button type="submit" colorScheme="teal" isLoading={isLoading}>
+                    Find Trips
+                </Button>
+            </form>
+
+            {startStop && endStop && (
+                <Text mt={4} mb={2}>
+                    Showing trips from {startStop} to {endStop}
                 </Text>
+            )}
 
-                <HStack spacing={4}>
-                    <PaginatedDropdown
-                        options={stops}
-                        value={startStop}
-                        onChange={setStartStop}
-                        placeholder={
-                            fetchingStops
-                                ? "Loading stops..."
-                                : "Select start stop"
-                        }
-                    />
+            {isLoading ? (
+                <Spinner mt={4} />
+            ) : (
+                <>
+                    <Table variant="simple" mt={4}>
+                        <Thead>
+                            <Tr>
+                                <Th>Route</Th>
+                                <Th>Trip ID</Th>
+                                <Th>Duration</Th>
+                                <Th>Distance</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>{renderTableRows()}</Tbody>
+                    </Table>
 
-                    <PaginatedDropdown
-                        options={stops}
-                        value={endStop}
-                        onChange={setEndStop}
-                        placeholder={
-                            fetchingStops
-                                ? "Loading stops..."
-                                : "Select end stop"
-                        }
-                    />
-
-                    <Button
-                        colorScheme="blue"
-                        onClick={handleSearch}
-                        isLoading={loading}
-                        isDisabled={!startStop || !endStop || fetchingStops}
-                    >
-                        Search
-                    </Button>
-                </HStack>
-
-                {availableTrips && availableTrips.length > 0 && (
-                    <Box>
-                        <Text fontSize="xl" fontWeight="semibold">
-                            Available Trips
-                        </Text>
-                        <Table variant="simple">
-                            <Thead>
-                                <Tr>
-                                    <Th>Route</Th>
-                                    <Th>Duration</Th>
-                                    <Th>Distance</Th>
-                                    <Th>Action</Th>
-                                </Tr>
-                            </Thead>
-                            <Tbody>
-                                {availableTrips.map((trip) => (
-                                    <Tr key={trip.trip_id}>
-                                        <Td>{trip.route_long_name || "N/A"}</Td>
-                                        <Td>
-                                            {safeNumberFormat(trip.duration)}{" "}
-                                            mins
-                                        </Td>
-                                        <Td>
-                                            {safeNumberFormat(trip.distance)} km
-                                        </Td>
-                                        <Td>
-                                            <Button
-                                                size="sm"
-                                                colorScheme="blue"
-                                                onClick={() =>
-                                                    handleTripSelect(
-                                                        trip.trip_id
-                                                    )
-                                                }
-                                                isLoading={
-                                                    loading &&
-                                                    selectedTrip ===
-                                                        trip.trip_id
-                                                }
-                                            >
-                                                Select
-                                            </Button>
-                                        </Td>
-                                    </Tr>
-                                ))}
-                            </Tbody>
-                        </Table>
-                    </Box>
-                )}
-
-                {tripDetails && (
-                    <Box>
-                        <Text fontSize="xl" fontWeight="semibold">
-                            Trip Details
-                        </Text>
-                        <VStack align="stretch" spacing={3}>
-                            <Text>
-                                Total Distance:{" "}
-                                {safeNumberFormat(tripDetails.total_distance)}{" "}
-                                km
-                            </Text>
-                            <Text>
-                                Expected Duration:{" "}
-                                {safeNumberFormat(
-                                    tripDetails.expected_duration
-                                )}{" "}
-                                minutes
-                            </Text>
-                            <Text>
-                                Average Speed:{" "}
-                                {safeNumberFormat(
-                                    tripDetails.expected_speed_kmph
-                                )}{" "}
-                                km/h
-                            </Text>
-
-                            {tripDetails.in_between_stops &&
-                                tripDetails.in_between_stops.length > 0 && (
-                                    <>
-                                        <Text fontWeight="semibold">
-                                            Stops:
-                                        </Text>
-                                        <Table variant="simple" size="sm">
-                                            <Thead>
-                                                <Tr>
-                                                    <Th>Stop Name</Th>
-                                                    <Th>Arrival Time</Th>
-                                                </Tr>
-                                            </Thead>
-                                            <Tbody>
-                                                {tripDetails.in_between_stops.map(
-                                                    (stop, index) => (
-                                                        <Tr
-                                                            key={
-                                                                stop.stop_id ||
-                                                                index
-                                                            }
-                                                        >
-                                                            <Td>
-                                                                {stop.stop_name ||
-                                                                    "N/A"}
-                                                            </Td>
-                                                            <Td>
-                                                                {stop.arrival_time ||
-                                                                    "N/A"}
-                                                            </Td>
-                                                        </Tr>
-                                                    )
-                                                )}
-                                            </Tbody>
-                                        </Table>
-                                    </>
-                                )}
-                        </VStack>
-                    </Box>
-                )}
-            </VStack>
+                    {totalResults > 10 && (
+                        <Box mt={4}>
+                            <Button
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1}
+                                mr={2}
+                            >
+                                Previous
+                            </Button>
+                            <Button
+                                onClick={handleNextPage}
+                                disabled={currentPage * 10 >= totalResults}
+                            >
+                                Next
+                            </Button>
+                            <Box as="span" ml={4}>
+                                Page {currentPage} of {totalPages}
+                            </Box>
+                        </Box>
+                    )}
+                </>
+            )}
         </Box>
     );
 };

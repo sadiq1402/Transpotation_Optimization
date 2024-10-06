@@ -21,6 +21,8 @@ import StopsModal from "./components/StopsModal"; // Import StopsModal
 import CalendarDatesModal from "./components/CalendarDatesModal"; // Import CalendarDatesModal
 import FrequentRoutesModal from "./components/FrequentRoutesModal";
 import PeakHourTraffic from "./components/PeakHourTraffic";
+import TripPlanner from "./components/TripPlanner";
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl:
@@ -46,6 +48,8 @@ function App() {
         useState(false); // Modal state for Calendar Dates
     const [frequentRoutes, setFrequentRoutes] = useState();
     const [peak_hour_traffic, setPeak_hour_traffic] = useState(false);
+    const [trip_planner, set_trip_planner] = useState(false);
+
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
     };
@@ -123,6 +127,14 @@ function App() {
                         mt={2}
                     >
                         Peak Hour Traffic
+                    </Button>
+                    <Button
+                        onClick={() => set_trip_planner(true)} // Open CalendarDatesModal
+                        colorScheme="orange"
+                        size="sm"
+                        mt={2}
+                    >
+                        Trip Planner
                     </Button>
                 </VStack>
             </Box>
@@ -225,6 +237,9 @@ function App() {
                     <PeakHourTraffic
                         onClose={() => setPeak_hour_traffic(false)}
                     /> // Pass onClose handler
+                )}
+                {trip_planner && (
+                    <TripPlanner onClose={() => set_trip_planner(false)} /> // Pass onClose handler
                 )}
             </Box>
         </Flex>
