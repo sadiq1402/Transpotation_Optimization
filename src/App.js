@@ -15,14 +15,16 @@ import {
 import { FaTachometerAlt } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import RoutesModal from './components/RoutesModal';
-import TripsModal from './components/TripsModal'; // Import TripsModal
-import StopsModal from './components/StopsModal'; // Import StopsModal
-import CalendarDatesModal from './components/CalendarDatesModal'; // Import CalendarDatesModal
-
+import RoutesModal from "./components/RoutesModal";
+import TripsModal from "./components/TripsModal"; // Import TripsModal
+import StopsModal from "./components/StopsModal"; // Import StopsModal
+import CalendarDatesModal from "./components/CalendarDatesModal"; // Import CalendarDatesModal
+import FrequentRoutesModal from "./components/FrequentRoutesModal";
+import PeakHourTraffic from "./components/PeakHourTraffic";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+    iconRetinaUrl:
+        "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
     iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
     shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
 });
@@ -40,8 +42,10 @@ function App() {
     const [isRoutesModalOpen, setIsRoutesModalOpen] = useState(false);
     const [isTripsModalOpen, setIsTripsModalOpen] = useState(false); // Modal state for Trips
     const [isStopsModalOpen, setIsStopsModalOpen] = useState(false); // Modal state for Stops
-    const [isCalendarDatesModalOpen, setIsCalendarDatesModalOpen] = useState(false); // Modal state for Calendar Dates
-
+    const [isCalendarDatesModalOpen, setIsCalendarDatesModalOpen] =
+        useState(false); // Modal state for Calendar Dates
+    const [frequentRoutes, setFrequentRoutes] = useState();
+    const [peak_hour_traffic, setPeak_hour_traffic] = useState(false);
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
     };
@@ -56,7 +60,9 @@ function App() {
     return (
         <Flex>
             <Box w="16%" bg="gray.900" color="white" h="auto" p={4}>
-                <Heading size="md" mb={4}>Dashboard</Heading>
+                <Heading size="md" mb={4}>
+                    Dashboard
+                </Heading>
                 <VStack align="start" spacing={4}>
                     <Flex align="center">
                         <Icon as={FaTachometerAlt} mr={2} />
@@ -71,7 +77,7 @@ function App() {
                         Fetch Delay Distribution
                     </Button>
                     <Button
-                        onClick={() => setIsRoutesModalOpen(true)} 
+                        onClick={() => setIsRoutesModalOpen(true)}
                         colorScheme="blue"
                         size="sm"
                         mt={2}
@@ -102,13 +108,31 @@ function App() {
                     >
                         View Calendar Dates
                     </Button>
+                    <Button
+                        onClick={() => setFrequentRoutes(true)} // Open CalendarDatesModal
+                        colorScheme="orange"
+                        size="sm"
+                        mt={2}
+                    >
+                        Frequent Routes
+                    </Button>
+                    <Button
+                        onClick={() => setPeak_hour_traffic(true)} // Open CalendarDatesModal
+                        colorScheme="orange"
+                        size="sm"
+                        mt={2}
+                    >
+                        Peak Hour Traffic
+                    </Button>
                 </VStack>
             </Box>
             <Box w="84%" p={6}>
                 {activeView === "overview" && (
                     <>
                         <Flex justify="space-between" align="center" mb={6}>
-                            <Heading size="lg">Transit Management System</Heading>
+                            <Heading size="lg">
+                                Transit Management System
+                            </Heading>
                             <Flex align="center" gap={4}>
                                 <VStack spacing={0}>
                                     <Text fontSize="sm">Current Time:</Text>
@@ -133,20 +157,36 @@ function App() {
                         </MapContainer>
                         <Grid templateColumns="repeat(4, 1fr)" gap={6} mt={6}>
                             <GridItem bg="blue.500" p={4} borderRadius="md">
-                                <Text fontSize="lg" fontWeight="bold">Fuel Consumption</Text>
-                                <Text fontSize="2xl">{dashboardData.fuelConsumption}</Text>
+                                <Text fontSize="lg" fontWeight="bold">
+                                    Fuel Consumption
+                                </Text>
+                                <Text fontSize="2xl">
+                                    {dashboardData.fuelConsumption}
+                                </Text>
                             </GridItem>
                             <GridItem bg="green.500" p={4} borderRadius="md">
-                                <Text fontSize="lg" fontWeight="bold">Carbon Emissions</Text>
-                                <Text fontSize="2xl">{dashboardData.carbonEmissions}</Text>
+                                <Text fontSize="lg" fontWeight="bold">
+                                    Carbon Emissions
+                                </Text>
+                                <Text fontSize="2xl">
+                                    {dashboardData.carbonEmissions}
+                                </Text>
                             </GridItem>
                             <GridItem bg="orange.500" p={4} borderRadius="md">
-                                <Text fontSize="lg" fontWeight="bold">On-Time Performance</Text>
-                                <Text fontSize="2xl">{dashboardData.onTimePerformance}</Text>
+                                <Text fontSize="lg" fontWeight="bold">
+                                    On-Time Performance
+                                </Text>
+                                <Text fontSize="2xl">
+                                    {dashboardData.onTimePerformance}
+                                </Text>
                             </GridItem>
                             <GridItem bg="purple.500" p={4} borderRadius="md">
-                                <Text fontSize="lg" fontWeight="bold">User Satisfaction</Text>
-                                <Text fontSize="2xl">{dashboardData.userSatisfaction}</Text>
+                                <Text fontSize="lg" fontWeight="bold">
+                                    User Satisfaction
+                                </Text>
+                                <Text fontSize="2xl">
+                                    {dashboardData.userSatisfaction}
+                                </Text>
                             </GridItem>
                         </Grid>
                     </>
@@ -159,17 +199,32 @@ function App() {
 
                 {/* TripsModal */}
                 {isTripsModalOpen && (
-                    <TripsModal onClose={() => setIsTripsModalOpen(false)} />  // Pass onClose handler
+                    <TripsModal onClose={() => setIsTripsModalOpen(false)} /> // Pass onClose handler
                 )}
 
                 {/* StopsModal */}
                 {isStopsModalOpen && (
-                    <StopsModal onClose={() => setIsStopsModalOpen(false)} />  // Pass onClose handler
+                    <StopsModal onClose={() => setIsStopsModalOpen(false)} /> // Pass onClose handler
                 )}
 
                 {/* CalendarDatesModal */}
                 {isCalendarDatesModalOpen && (
-                    <CalendarDatesModal onClose={() => setIsCalendarDatesModalOpen(false)} /> // Pass onClose handler
+                    <CalendarDatesModal
+                        onClose={() => setIsCalendarDatesModalOpen(false)}
+                    /> // Pass onClose handler
+                )}
+
+                {/* FrequentModal */}
+                {frequentRoutes && (
+                    <FrequentRoutesModal
+                        onClose={() => setFrequentRoutes(false)}
+                    /> // Pass onClose handler
+                )}
+                {/* FrequentModal */}
+                {peak_hour_traffic && (
+                    <PeakHourTraffic
+                        onClose={() => setPeak_hour_traffic(false)}
+                    /> // Pass onClose handler
                 )}
             </Box>
         </Flex>
