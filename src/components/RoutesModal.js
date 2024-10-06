@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+    Box,
+    Button,
+    Table,
+    Thead,
+    Tbody,
+    Tr,
+    Th,
+    Td,
+    Text,
+    Flex,
+} from '@chakra-ui/react';
 
 function RoutesModal() {
     const [routeData, setRouteData] = useState([]); // Initialize as an empty array
     const [currentPage, setCurrentPage] = useState(1); // State to track the current page
     const routesPerPage = 10; // Number of routes to show per page
 
-    // Fetch data from the API
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axios.get('http://127.0.0.1:5000/routes');
                 console.log("API Response:", response.data); // Log the response to confirm it's correct
-
                 setRouteData(response.data);
             } catch (error) {
                 console.error("Error fetching route analysis data:", error);
@@ -21,31 +31,27 @@ function RoutesModal() {
         fetchData();
     }, []);
 
-    // Calculate the range of routes to display based on the current page
     const indexOfLastRoute = currentPage * routesPerPage;
     const indexOfFirstRoute = indexOfLastRoute - routesPerPage;
     const currentRoutes = routeData.slice(indexOfFirstRoute, indexOfLastRoute);
 
-    // Function to render the table rows for the current page
     const renderRows = () => {
         return currentRoutes.map((route, index) => (
-            <tr key={index}>
-                <td>{route.route_id || "NA"}</td>
-                <td>{route.route_short_name || "NA"}</td>
-                <td>{route.route_long_name || "NA"}</td>
-                <td>{route.route_type || "NA"}</td>
-            </tr>
+            <Tr key={index}>
+                <Td>{route.route_id || "NA"}</Td>
+                <Td>{route.route_short_name || "NA"}</Td>
+                <Td>{route.route_long_name || "NA"}</Td>
+                <Td>{route.route_type || "NA"}</Td>
+            </Tr>
         ));
     };
 
-    // Handle "Next" button click
     const handleNextPage = () => {
         if (currentPage < Math.ceil(routeData.length / routesPerPage)) {
             setCurrentPage(currentPage + 1);
         }
     };
 
-    // Handle "Previous" button click
     const handlePreviousPage = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
@@ -53,47 +59,46 @@ function RoutesModal() {
     };
 
     return (
-        <>
-            <div>This is coming from RoutesModal</div>
+        <Box p={6} bg="gray.50" borderRadius="md" boxShadow="md">
+            <Text fontSize="2xl" mb={4}>Routes Information</Text>
             {routeData.length === 0 ? (
-                <p>No routes to display</p>
+                <Text>No routes to display</Text>
             ) : (
                 <>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Route ID</th>
-                                <th>Route Short Name</th>
-                                <th>Route Long Name</th>
-                                <th>Route Type</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Table variant="simple" size="sm">
+                        <Thead>
+                            <Tr>
+                                <Th>Route ID</Th>
+                                <Th>Route Short Name</Th>
+                                <Th>Route Long Name</Th>
+                                <Th>Route Type</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
                             {renderRows()}
-                        </tbody>
-                    </table>
+                        </Tbody>
+                    </Table>
 
-                    {/* Pagination Controls */}
-                    <div style={{ marginTop: '20px' }}>
-                        <button
+                    <Flex justify="space-between" mt={4}>
+                        <Button
                             onClick={handlePreviousPage}
                             disabled={currentPage === 1}
-                            style={{ marginRight: '10px' }}
+                            colorScheme="blue"
                         >
                             Previous
-                        </button>
-                        <span>Page {currentPage} of {Math.ceil(routeData.length / routesPerPage)}</span>
-                        <button
+                        </Button>
+                        <Text>Page {currentPage} of {Math.ceil(routeData.length / routesPerPage)}</Text>
+                        <Button
                             onClick={handleNextPage}
                             disabled={currentPage === Math.ceil(routeData.length / routesPerPage)}
-                            style={{ marginLeft: '10px' }}
+                            colorScheme="blue"
                         >
                             Next
-                        </button>
-                    </div>
+                        </Button>
+                    </Flex>
                 </>
             )}
-        </>
+        </Box>
     );
 }
 
