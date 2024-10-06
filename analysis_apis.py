@@ -64,10 +64,11 @@ def get_routes():
     """
     API to get the list of routes from the GTFS feed.
     """
-    routes_df = feed.routes
+    routes_df = feed.routes.fillna('NA')  # Replace NaN with a placeholder like 'NA'
     routes_json = routes_df.to_dict(orient='records')
+    
+    # print("Routes JSON (after replacing NaN):", routes_json)  # Log modified response
     return jsonify(routes_json), 200
-
 @app.route('/route/<route_id>', methods=['GET'])
 def get_route_by_id(route_id):
     """
