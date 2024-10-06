@@ -45,8 +45,6 @@ function StopsModal({ onClose }) {
                 <Td>{stop.stop_desc || 'NA'}</Td>
                 <Td>{stop.stop_lat || 'NA'}</Td>
                 <Td>{stop.stop_lon || 'NA'}</Td>
-                <Td>{stop.wheelchair_boarding || 'NA'}</Td>
-                <Td>{stop.zone_id || 'NA'}</Td>
             </Tr>
         ));
     };
@@ -79,8 +77,6 @@ function StopsModal({ onClose }) {
                                 <Th>Description</Th>
                                 <Th>Latitude</Th>
                                 <Th>Longitude</Th>
-                                <Th>Wheelchair Boarding</Th>
-                                <Th>Zone ID</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
