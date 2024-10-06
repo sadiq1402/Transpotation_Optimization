@@ -79,13 +79,16 @@ def get_routes():
     
     # print("Routes JSON (after replacing NaN):", routes_json)  # Log modified response
     return jsonify(routes_json), 200
+
 @app.route('/route/<route_id>', methods=['GET'])
 def get_route_by_id(route_id):
     """
     API to get the details of a specific route by its ID.
     """
     route = feed.routes[feed.routes['route_id'] == route_id]
+
     if not route.empty:
+        route = route.fillna('NA')  # Replace NaN with 'NA'
         route_json = route.to_dict(orient='records')
         return jsonify(route_json), 200
     else:
@@ -94,9 +97,9 @@ def get_route_by_id(route_id):
 @app.route('/stops', methods=['GET'])
 def get_stops():
     """
-    API to get the list of all stops from the GTFS feed.
+    API to get the list of all stops from the GTFS feed, replacing NaN values.
     """
-    stops_df = feed.stops
+    stops_df = feed.stops.fillna("NA")  # Replace NaN with "NA" or choose None to send null
     stops_json = stops_df.to_dict(orient='records')
     return jsonify(stops_json), 200
 
@@ -117,10 +120,12 @@ def get_trips():
     """
     API to get the list of all trips from the GTFS feed.
     """
-    trips_df = feed.trips
+    trips_df = feed.trips.fillna('NA')  # Replace NaN with a placeholder like 'NA'
     trips_json = trips_df.to_dict(orient='records')
+    
+    # print("Trips JSON (after replacing NaN):", trips_json)  # Optional: Log modified response
     return jsonify(trips_json), 200
-
+  
 @app.route('/trip/<trip_id>', methods=['GET'])
 def get_trip_by_id(trip_id):
     """
@@ -128,7 +133,7 @@ def get_trip_by_id(trip_id):
     """
     trip = feed.trips[feed.trips['trip_id'] == trip_id]
     if not trip.empty:
-        trip_json = trip.to_dict(orient='records')
+        trip_json = trip.fillna('NA').to_dict(orient='records')  # Replace NaN with 'NA'
         return jsonify(trip_json), 200
     else:
         return jsonify({'error': 'Trip not found'}), 404
