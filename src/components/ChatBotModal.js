@@ -125,11 +125,21 @@ const ChatBotModal = () => {
 
   return (
     <>
-      <Button onClick={onOpen} leftIcon={<FaRobot />} colorScheme="teal">
-        Ask Me
+      {/* Floating Button to Open Modal */}
+      <Button
+        position="fixed"
+        bottom="20px"
+        right="20px"
+        colorScheme="teal"
+        borderRadius="full"
+        boxShadow="lg"
+        onClick={onOpen}
+        size="lg"
+      >
+        <FaRobot size="24px" />
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="4xl"> 
+      <Modal isOpen={isOpen} onClose={onClose} size="4xl">
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Ask Me</ModalHeader>
@@ -141,7 +151,7 @@ const ChatBotModal = () => {
                 borderRadius="lg"
                 p={4}
                 height="450px"
-                width="100%"  
+                width="100%"
                 overflowY="auto"
               >
                 {messages.map((message, index) => (
@@ -162,11 +172,11 @@ const ChatBotModal = () => {
                       px={8}
                       py={2}
                       borderRadius="lg"
-                      maxWidth={message.isUser ? "85%" : "90%"} 
+                      maxWidth={message.isUser ? "85%" : "90%"}
                       wordBreak="break-word"
                     >
                       {message.isUser ? (
-                        <Text >{message.text}</Text>
+                        <Text>{message.text}</Text>
                       ) : (
                         <ReactMarkdown
                           components={{

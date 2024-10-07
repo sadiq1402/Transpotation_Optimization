@@ -13,33 +13,35 @@ import {
     Tr,
     Th,
     Td,
-    Flex
+    Flex,
+    VStack
 } from '@chakra-ui/react';
+import { useConfig } from "../configContext";
 
-function RoutesModal() {
-    const [routeData, setRouteData] = useState([]); // Initialize as an empty array
-    const [routeDetails, setRouteDetails] = useState(null);  // State to store route details
-    const [loadingDetails, setLoadingDetails] = useState(false);  // Loading state for route details
-    const [detailsError, setDetailsError] = useState('');  // Error state for route details
-    const [searchTerm, setSearchTerm] = useState('');  // State for search input
-    const [filteredRoutes, setFilteredRoutes] = useState([]);  // State for filtered routes
-    const [currentPage, setCurrentPage] = useState(1); // State to track the current page for pagination
-    const routesPerPage = 10; // Number of routes to show per page
+function RoutesModal({ onClose }) {
+    const { baseURL } = useConfig();
+    const [routeData, setRouteData] = useState([]);
+    const [routeDetails, setRouteDetails] = useState(null);
+    const [loadingDetails, setLoadingDetails] = useState(false);
+    const [detailsError, setDetailsError] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredRoutes, setFilteredRoutes] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const routesPerPage = 10;
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/routes');
+                const response = await axios.get(`${baseURL}/routes`);
                 setRouteData(response.data);
-                setFilteredRoutes(response.data);  // Set initial filtered data
+                setFilteredRoutes(response.data);
             } catch (error) {
                 console.error("Error fetching route data:", error);
             }
         };
         fetchData();
-    }, []);
+    }, [baseURL]);
 
-    // Filter routes based on search term
     useEffect(() => {
         if (searchTerm) {
             const filtered = routeData.filter(route =>
@@ -58,9 +60,9 @@ function RoutesModal() {
         setRouteDetails(null);
 
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/route/${route_id}`);
+            const response = await axios.get(`${baseURL}/route/${route_id}`);
             if (response.status === 200) {
-                setRouteDetails(response.data[0]);  // Assuming a single route is returned
+                setRouteDetails(response.data[0]);
             } else {
                 setDetailsError('Error fetching route details');
             }
@@ -71,21 +73,18 @@ function RoutesModal() {
         }
     };
 
-    // Handle search input change
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
     };
 
-    // Handle route selection from dropdown and fetch details
     const handleRouteSelect = (route_id) => {
-        fetchRouteDetails(route_id);  // Fetch details for the selected route
-        setSearchTerm('');  // Clear search after selection
+        fetchRouteDetails(route_id);
+        setSearchTerm('');
     };
 
-    // Pagination handling
     const indexOfLastRoute = currentPage * routesPerPage;
     const indexOfFirstRoute = indexOfLastRoute - routesPerPage;
-    const currentRoutes = filteredRoutes.slice(indexOfFirstRoute, indexOfLastRoute); // Paginate filtered routes
+    const currentRoutes = filteredRoutes.slice(indexOfFirstRoute, indexOfLastRoute);
 
     const handleNextPage = () => {
         if (currentPage < Math.ceil(filteredRoutes.length / routesPerPage)) {
@@ -119,7 +118,6 @@ function RoutesModal() {
         ));
     };
 
-    // Function to get the color from hex code
     const getColorFromHex = (hex) => {
         return hex.startsWith('#') ? hex : `#${hex}`;
     };
@@ -128,7 +126,6 @@ function RoutesModal() {
         <Box p={6} bg="gray.50" borderRadius="md" boxShadow="md">
             <Text fontSize="2xl" mb={4}>Routes Information</Text>
 
-            {/* Search Bar with Dropdown */}
             <Box mb={4}>
                 <Input 
                     placeholder="Search by Route Name"
@@ -145,7 +142,7 @@ function RoutesModal() {
                                     p={2}
                                     cursor="pointer"
                                     _hover={{ bg: "gray.100" }}
-                                    onClick={() => handleRouteSelect(route.route_id)}  // Select route and fetch details
+                                    onClick={() => handleRouteSelect(route.route_id)}
                                 >
                                     {route.route_short_name} - {route.route_long_name}
                                 </ListItem>
@@ -157,7 +154,6 @@ function RoutesModal() {
                 )}
             </Box>
 
-            {/* Display paginated list of routes */}
             {filteredRoutes.length === 0 ? (
                 <Text>No routes to display</Text>
             ) : (
@@ -169,7 +165,7 @@ function RoutesModal() {
                                 <Th>Route Short Name</Th>
                                 <Th>Route Long Name</Th>
                                 <Th>Route Type</Th>
-                                <Th>Action</Th> {/* Added Action column */}
+                                <Th>Action</Th>
                             </Tr>
                         </Thead>
                         <Tbody>
@@ -197,7 +193,6 @@ function RoutesModal() {
                 </>
             )}
 
-            {/* Display route details */}
             {loadingDetails ? (
                 <Text mt={4}>Loading route details...</Text>
             ) : detailsError ? (
@@ -224,6 +219,13 @@ function RoutesModal() {
             ) : (
                 <Text>No route selected. Please search and select a route.</Text>
             )}
+
+            {/* Close button */}
+            <VStack mt={4}>
+                <Button colorScheme="red" onClick={onClose}>
+                    Close
+                </Button>
+            </VStack>
         </Box>
     );
 }

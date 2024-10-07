@@ -17,8 +17,11 @@ import {
     InputRightElement,
     Spinner,
 } from "@chakra-ui/react";
+import { useConfig } from "../configContext";
+import Plot from "react-plotly.js"; // Import Plotly component
 
 function FrequentRoutesModal({ onClose }) {
+    const { baseURL } = useConfig();
     const [frequentRoutes, setFrequentRoutes] = useState({
         most_frequent_routes: [],
         least_frequent_routes: [],
@@ -42,7 +45,7 @@ function FrequentRoutesModal({ onClose }) {
         setError("");
         try {
             const response = await axios.get(
-                `http://127.0.0.1:5000/api/frequent_routes?date=${date}`
+                `${baseURL}/api/frequent_routes?date=${date}`
             );
             if (response.status === 200) {
                 setFrequentRoutes(response.data);
@@ -66,6 +69,20 @@ function FrequentRoutesModal({ onClose }) {
         }
     };
 
+    // Function to render route color with a '#' prefix
+    const renderColorBox = (color) => {
+        const formattedColor = `#${color}`; // Add '#' prefix to color
+        return (
+            <Box
+                width="20px"
+                height="20px"
+                borderRadius="full"
+                backgroundColor={formattedColor}
+                border="1px solid black"
+            />
+        );
+    };
+
     // Pagination for Most Frequent Routes
     const indexOfLastMostRoute = currentPageMost * routesPerPage;
     const indexOfFirstMostRoute = indexOfLastMostRoute - routesPerPage;
@@ -82,6 +99,32 @@ function FrequentRoutesModal({ onClose }) {
             indexOfFirstLeastRoute,
             indexOfLastLeastRoute
         );
+
+    // Prepare data for Plotly
+    const preparePlotData = () => {
+        const mostFrequent = currentMostFrequentRoutes.map(route => ({
+            routeName: route.route_long_name,
+            maxHeadway: route.max_headway,
+            minHeadway: route.min_headway,
+        }));
+
+        const leastFrequent = currentLeastFrequentRoutes.map(route => ({
+            routeName: route.route_long_name,
+            maxHeadway: route.max_headway,
+            minHeadway: route.min_headway,
+        }));
+
+        return {
+            xMost: mostFrequent.map(route => route.routeName),
+            yMaxMost: mostFrequent.map(route => route.maxHeadway),
+            yMinMost: mostFrequent.map(route => route.minHeadway),
+            xLeast: leastFrequent.map(route => route.routeName),
+            yMaxLeast: leastFrequent.map(route => route.maxHeadway),
+            yMinLeast: leastFrequent.map(route => route.minHeadway),
+        };
+    };
+
+    const plotData = preparePlotData();
 
     return (
         <Box p={6} bg="gray.50" borderRadius="md" boxShadow="md">
@@ -130,7 +173,7 @@ function FrequentRoutesModal({ onClose }) {
                                             <Tr key={index}>
                                                 <Td>{route.route_id}</Td>
                                                 <Td>{route.route_long_name}</Td>
-                                                <Td>{route.route_color}</Td>
+                                                <Td>{renderColorBox(route.route_color)}</Td> {/* Render color box */}
                                                 <Td>{route.max_headway}</Td>
                                                 <Td>{route.min_headway}</Td>
                                             </Tr>
@@ -138,6 +181,30 @@ function FrequentRoutesModal({ onClose }) {
                                     )}
                                 </Tbody>
                             </Table>
+
+                            {/* Plotly Chart for Most Frequent Routes */}
+                            <Plot
+                                data={[
+                                    {
+                                        x: plotData.xMost,
+                                        y: plotData.yMaxMost,
+                                        type: 'bar',
+                                        name: 'Max Headway',
+                                    },
+                                    {
+                                        x: plotData.xMost,
+                                        y: plotData.yMinMost,
+                                        type: 'bar',
+                                        name: 'Min Headway',
+                                    },
+                                ]}
+                                layout={{
+                                    title: 'Most Frequent Routes - Headway',
+                                    barmode: 'group',
+                                    xaxis: { title: 'Route Name' },
+                                    yaxis: { title: 'Headway (min)' },
+                                }}
+                            />
 
                             {/* Pagination for Most Frequent Routes */}
                             <Flex justify="space-between" mt={4}>
@@ -208,7 +275,7 @@ function FrequentRoutesModal({ onClose }) {
                                             <Tr key={index}>
                                                 <Td>{route.route_id}</Td>
                                                 <Td>{route.route_long_name}</Td>
-                                                <Td>{route.route_color}</Td>
+                                                <Td>{renderColorBox(route.route_color)}</Td> {/* Render color box */}
                                                 <Td>{route.max_headway}</Td>
                                                 <Td>{route.min_headway}</Td>
                                             </Tr>
@@ -216,6 +283,30 @@ function FrequentRoutesModal({ onClose }) {
                                     )}
                                 </Tbody>
                             </Table>
+
+                            {/* Plotly Chart for Least Frequent Routes */}
+                            <Plot
+                                data={[
+                                    {
+                                        x: plotData.xLeast,
+                                        y: plotData.yMaxLeast,
+                                        type: 'bar',
+                                        name: 'Max Headway',
+                                    },
+                                    {
+                                        x: plotData.xLeast,
+                                        y: plotData.yMinLeast,
+                                        type: 'bar',
+                                        name: 'Min Headway',
+                                    },
+                                ]}
+                                layout={{
+                                    title: 'Least Frequent Routes - Headway',
+                                    barmode: 'group',
+                                    xaxis: { title: 'Route Name' },
+                                    yaxis: { title: 'Headway (min)' },
+                                }}
+                            />
 
                             {/* Pagination for Least Frequent Routes */}
                             <Flex justify="space-between" mt={4}>
@@ -266,13 +357,6 @@ function FrequentRoutesModal({ onClose }) {
                     )}
                 </>
             )}
-
-            {/* Close button */}
-            <VStack mt={4}>
-                <Button colorScheme="red" onClick={onClose}>
-                    Close
-                </Button>
-            </VStack>
         </Box>
     );
 }

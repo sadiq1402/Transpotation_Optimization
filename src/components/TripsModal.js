@@ -16,8 +16,10 @@ import {
     InputGroup,
     InputRightElement
 } from '@chakra-ui/react';
+import { useConfig } from "../configContext";
 
 function TripsModal({ onClose }) { 
+    const { baseURL } = useConfig();
     const [tripsData, setTripsData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const tripsPerPage = 10;
@@ -29,7 +31,7 @@ function TripsModal({ onClose }) {
     useEffect(() => {
         const fetchTripsData = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/trips');
+                const response = await axios.get(`${baseURL}/trips`);
                 if (response.status === 200) {
                     setTripsData(response.data);
                 } else {
@@ -77,7 +79,7 @@ function TripsModal({ onClose }) {
 
         setLoading(true);
         try {
-            const response = await axios.get(`http://127.0.0.1:5000/trip/${searchTripId}`);
+            const response = await axios.get(`${baseURL}/trip/${searchTripId}`);
             if (response.status === 200) {
                 setSearchResult(response.data[0]);  // Assuming a single trip result
                 setError('');

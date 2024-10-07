@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useConfig } from "../configContext"; // Import useConfig to get the config
+import Plot from "react-plotly.js"; // Import Plotly component
+
 import {
     Box,
     Button,
@@ -19,6 +22,7 @@ import {
 } from "@chakra-ui/react";
 
 function PeakHourTraffic({ onClose }) {
+    const { baseURL } = useConfig(); // Get the baseURL from context
     const [peakHourRoutes, setPeakHourRoutes] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -38,7 +42,7 @@ function PeakHourTraffic({ onClose }) {
 
         try {
             const response = await axios.get(
-                `http://127.0.0.1:5000/api/peak_hour_traffic?date=${searchDate}`
+                `${baseURL}/api/peak_hour_traffic?date=${searchDate}`
             );
             if (response.status === 200) {
                 setPeakHourRoutes(response.data.peak_hour_routes);
@@ -57,12 +61,32 @@ function PeakHourTraffic({ onClose }) {
     const lastIndex = currentPage * itemsPerPage;
     const firstIndex = lastIndex - itemsPerPage;
     const currentItems = peakHourRoutes.slice(firstIndex, lastIndex);
-
     const totalPages = Math.ceil(peakHourRoutes.length / itemsPerPage);
-
-    const nextPage = () =>
-        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    
+    const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
     const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+
+    // Prepare data for Plotly
+    const plotData = {
+        x: peakHourRoutes.map(route => route.route_long_name), // X-axis: Route Names
+        y: peakHourRoutes.map(route => route.trip_id), // Y-axis: Number of Trips (or you can change this to another metric)
+        type: 'bar', // Type of chart (bar chart)
+        marker: { color: 'blue' } // Customize bar color
+    };
+
+    // Function to render route color with a '#' prefix
+    const renderColorBox = (color) => {
+        const formattedColor = `#${color}`; // Add '#' prefix to color
+        return (
+            <Box
+                width="20px"
+                height="20px"
+                borderRadius="full"
+                backgroundColor={formattedColor}
+                border="1px solid black"
+            />
+        );
+    };
 
     return (
         <Box p={6} bg="gray.50" borderRadius="md" boxShadow="md">
@@ -106,13 +130,26 @@ function PeakHourTraffic({ onClose }) {
                                     <Tr key={index}>
                                         <Td>{route.route_id}</Td>
                                         <Td>{route.route_long_name}</Td>
-                                        <Td>{route.route_color}</Td>
+                                        <Td>{renderColorBox(route.route_color)}</Td> {/* Render color box */}
                                         <Td>{route.trip_id}</Td>
                                         <Td>{route.time_period.join(", ")}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
                         </Table>
+                    )}
+
+                    {/* Plotly Chart */}
+                    {peakHourRoutes.length > 0 && (
+                        <Plot
+                            data={[plotData]}
+                            layout={{
+                                title: 'Peak Hour Traffic Analysis',
+                                xaxis: { title: 'Route Name' },
+                                yaxis: { title: 'Number of Trips' },
+                            }}
+                            style={{ width: "100%", height: "400px" }}
+                        />
                     )}
 
                     {/* Pagination Controls */}

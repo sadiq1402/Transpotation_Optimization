@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
     Box,
@@ -15,29 +15,29 @@ import {
     VStack,
     HStack,
 } from "@chakra-ui/react";
+import { useConfig } from "../configContext";
+import Plot from "react-plotly.js";
 
-const RouteEfficiency = () => {
+const RouteEfficiency = ({ onClose }) => {
+    const { baseURL } = useConfig();
     const [mostEfficientRoutes, setMostEfficientRoutes] = useState([]);
     const [leastEfficientRoutes, setLeastEfficientRoutes] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [date, setDate] = useState(""); // For user to input the date
-    const [currentPage, setCurrentPage] = useState(1); // Pagination state for most efficient routes
-    const [currentPageLeast, setCurrentPageLeast] = useState(1); // Pagination state for least efficient routes
-    const [routesPerPage] = useState(5); // Routes displayed per page
+    const [date, setDate] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPageLeast, setCurrentPageLeast] = useState(1);
+    const [routesPerPage] = useState(5);
     const toast = useToast();
 
     const fetchRouteEfficiency = async () => {
         setIsLoading(true);
         try {
             const response = await axios.get(
-                "http://127.0.0.1:5000/api/route_efficiency",
+                `${baseURL}/api/route_efficiency`,
                 {
-                    params: {
-                        date, // Pass the date entered by the user
-                    },
+                    params: { date },
                 }
             );
-
             setMostEfficientRoutes(response.data.most_efficient_routes);
             setLeastEfficientRoutes(response.data.least_efficient_routes);
         } catch (error) {
@@ -53,11 +53,8 @@ const RouteEfficiency = () => {
         }
     };
 
-    const handleDateChange = (e) => {
-        setDate(e.target.value);
-    };
+    const handleDateChange = (e) => setDate(e.target.value);
 
-    // Pagination Logic for Most Efficient Routes
     const indexOfLastRoute = currentPage * routesPerPage;
     const indexOfFirstRoute = indexOfLastRoute - routesPerPage;
     const currentMostEfficientRoutes = mostEfficientRoutes.slice(
@@ -73,13 +70,28 @@ const RouteEfficiency = () => {
     );
 
     const paginateMostEfficient = (pageNumber) => setCurrentPage(pageNumber);
-    const paginateLeastEfficient = (pageNumber) =>
-        setCurrentPageLeast(pageNumber);
+    const paginateLeastEfficient = (pageNumber) => setCurrentPageLeast(pageNumber);
+
+    // Prepare data for Plotly chart
+    const mostEfficientPlotData = {
+        x: mostEfficientRoutes.map(route => route.route_long_name),
+        y: mostEfficientRoutes.map(route => route.efficiency_score),
+        type: 'bar',
+        name: 'Most Efficient Routes',
+        marker: { color: '8FD14F' },
+    };
+
+    const leastEfficientPlotData = {
+        x: leastEfficientRoutes.map(route => route.route_long_name),
+        y: leastEfficientRoutes.map(route => route.efficiency_score),
+        type: 'bar',
+        name: 'Least Efficient Routes',
+        marker: { color: 'FF885B' },
+    };
 
     return (
         <VStack spacing={6} p={4}>
             <Heading>Route Efficiency</Heading>
-
             <Box>
                 <input
                     type="text"
@@ -87,11 +99,7 @@ const RouteEfficiency = () => {
                     value={date}
                     onChange={handleDateChange}
                 />
-                <Button
-                    colorScheme="teal"
-                    onClick={fetchRouteEfficiency}
-                    ml={4}
-                >
+                <Button colorScheme="teal" onClick={fetchRouteEfficiency} ml={4}>
                     Fetch Data
                 </Button>
             </Box>
@@ -115,36 +123,31 @@ const RouteEfficiency = () => {
                                     <Tr key={route.route_id}>
                                         <Td>{route.route_id}</Td>
                                         <Td>{route.route_long_name}</Td>
-                                        <Td>
-                                            {route.efficiency_score.toFixed(2)}
-                                        </Td>
+                                        <Td>{route.efficiency_score.toFixed(2)}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
                         </Table>
-
                         {/* Pagination for Most Efficient Routes */}
                         <HStack mt={4} spacing={2}>
                             {Array.from(
                                 {
-                                    length: Math.ceil(
-                                        mostEfficientRoutes.length /
-                                            routesPerPage
-                                    ),
+                                    length: Math.ceil(mostEfficientRoutes.length / routesPerPage),
                                 },
                                 (_, index) => (
-                                    <Button
-                                        key={index}
-                                        onClick={() =>
-                                            paginateMostEfficient(index + 1)
-                                        }
-                                    >
+                                    <Button key={index} onClick={() => paginateMostEfficient(index + 1)}>
                                         {index + 1}
                                     </Button>
                                 )
                             )}
                         </HStack>
                     </Box>
+
+                    {/* Plot for Most Efficient Routes */}
+                    <Plot
+                        data={[mostEfficientPlotData]}
+                        layout={{ title: "Most Efficient Routes", width: 700, height: 400 }}
+                    />
 
                     <Box>
                         <Heading size="md">Least Efficient Routes</Heading>
@@ -161,38 +164,39 @@ const RouteEfficiency = () => {
                                     <Tr key={route.route_id}>
                                         <Td>{route.route_id}</Td>
                                         <Td>{route.route_long_name}</Td>
-                                        <Td>
-                                            {route.efficiency_score.toFixed(2)}
-                                        </Td>
+                                        <Td>{route.efficiency_score.toFixed(2)}</Td>
                                     </Tr>
                                 ))}
                             </Tbody>
                         </Table>
-
                         {/* Pagination for Least Efficient Routes */}
                         <HStack mt={4} spacing={2}>
                             {Array.from(
                                 {
-                                    length: Math.ceil(
-                                        leastEfficientRoutes.length /
-                                            routesPerPage
-                                    ),
+                                    length: Math.ceil(leastEfficientRoutes.length / routesPerPage),
                                 },
                                 (_, index) => (
-                                    <Button
-                                        key={index}
-                                        onClick={() =>
-                                            paginateLeastEfficient(index + 1)
-                                        }
-                                    >
+                                    <Button key={index} onClick={() => paginateLeastEfficient(index + 1)}>
                                         {index + 1}
                                     </Button>
                                 )
                             )}
                         </HStack>
                     </Box>
+
+                    {/* Plot for Least Efficient Routes */}
+                    <Plot
+                        data={[leastEfficientPlotData]}
+                        layout={{ title: "Least Efficient Routes", width: 700, height: 400 }}
+                    />
                 </>
             )}
+
+            <VStack mt={4}>
+                <Button colorScheme="red" onClick={onClose}>
+                    Close
+                </Button>
+            </VStack>
         </VStack>
     );
 };

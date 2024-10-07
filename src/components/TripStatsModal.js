@@ -13,8 +13,10 @@ import {
     Flex,
 } from "@chakra-ui/react";
 import Plot from "react-plotly.js";
+import { useConfig } from "../configContext";
 
 function TripStatsModal({ onClose }) {
+    const { baseURL } = useConfig();
     const [tripStatsData, setTripStatsData] = useState({
         trip_duration_analysis: [],
         trip_period_analysis: [],
@@ -34,7 +36,7 @@ function TripStatsModal({ onClose }) {
         setIsLoading(true);
         try {
             const response = await axios.get(
-                `http://127.0.0.1:5000/api/trip_stats`,
+                `${baseURL}/api/trip_stats`,
                 {
                     params: { date: selectedDate },
                 }
@@ -211,8 +213,46 @@ function TripStatsModal({ onClose }) {
                 <Text>No statistics to display</Text>
             ) : (
                 <>
+                    {/* Table for Trip Duration Analysis */}
+                    <Table variant="simple" mt={4}>
+                        <Thead>
+                            <Tr>
+                                <Th>Time/Period</Th>
+                                <Th>Number of Trips</Th>
+                                <Th>Mean Duration (min)</Th>
+                                <Th>Min Duration</Th>
+                                <Th>Max Duration</Th>
+                                <Th>Mean Speed (km/h)</Th>
+                                <Th>Min Speed (km/h)</Th>
+                                <Th>Max Speed (km/h)</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {renderRows(currentTripDurationAnalysis)}
+                        </Tbody>
+                    </Table>
+
                     {/* Plot for Trip Duration Analysis */}
                     {renderTripDurationPlot()}
+
+                    {/* Table for Trip Period Analysis */}
+                    <Table variant="simple" mt={4}>
+                        <Thead>
+                            <Tr>
+                                <Th>Period Time</Th>
+                                <Th>Number of Trips</Th>
+                                <Th>Mean Duration (min)</Th>
+                                <Th>Min Duration</Th>
+                                <Th>Max Duration</Th>
+                                <Th>Mean Speed (km/h)</Th>
+                                <Th>Min Speed (km/h)</Th>
+                                <Th>Max Speed (km/h)</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {renderRows(currentTripPeriodAnalysis)}
+                        </Tbody>
+                    </Table>
 
                     {/* Plot for Trip Period Analysis */}
                     {renderTripPeriodPlot()}

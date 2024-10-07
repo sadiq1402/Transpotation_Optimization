@@ -13,9 +13,13 @@ import {
     useToast,
     Spinner,
     Text,
+    VStack,
 } from "@chakra-ui/react";
+import Plot from "react-plotly.js"; // Import Plotly
+import { useConfig } from "../configContext";
 
-const TripPlanner = () => {
+const TripPlanner = ({ onClose }) => {
+    const { baseURL } = useConfig();
     const [stops, setStops] = useState([]);
     const [results, setResults] = useState({ trips_between_stops: [] });
     const [startStop, setStartStop] = useState("");
@@ -30,7 +34,7 @@ const TripPlanner = () => {
 
     const fetchStops = async () => {
         try {
-            const response = await axios.get("http://127.0.0.1:5000/stops");
+            const response = await axios.get(`${baseURL}/stops`);
             setStops(response.data || []);
         } catch (error) {
             toast({
@@ -64,16 +68,10 @@ const TripPlanner = () => {
         setIsLoading(true);
 
         try {
-            const encodedStartStop = encodeURIComponent(
-                normalizeStopName(startStop)
-            ).replace(/%20/g, "%20");
-            const encodedEndStop = encodeURIComponent(
-                normalizeStopName(endStop)
-            ).replace(/%20/g, "%20");
+            const encodedStartStop = encodeURIComponent(normalizeStopName(startStop)).replace(/%20/g, "%20");
+            const encodedEndStop = encodeURIComponent(normalizeStopName(endStop)).replace(/%20/g, "%20");
 
-            const url = `http://127.0.0.1:5000/api/trips_between_stops?start_stop_name=${encodedStartStop}&end_stop_name=${encodedEndStop}`;
-
-            console.log("Requesting URL:", url);
+            const url = `${baseURL}/api/trips_between_stops?start_stop_name=${encodedStartStop}&end_stop_name=${encodedEndStop}`;
 
             const response = await axios.get(url);
 
@@ -94,9 +92,7 @@ const TripPlanner = () => {
             console.error("API Error:", error.response || error);
             setResults({ trips_between_stops: [] });
 
-            const errorMessage =
-                error.response?.data?.error ||
-                "An error occurred while fetching trips.";
+            const errorMessage = error.response?.data?.error || "An error occurred while fetching trips.";
 
             toast({
                 title: "Error",
@@ -121,10 +117,7 @@ const TripPlanner = () => {
 
         const startIndex = (currentPage - 1) * 10;
         const endIndex = startIndex + 10;
-        const pageTrips = results.trips_between_stops.slice(
-            startIndex,
-            endIndex
-        );
+        const pageTrips = results.trips_between_stops.slice(startIndex, endIndex);
 
         return pageTrips.map((trip, index) => (
             <Tr key={index}>
@@ -141,7 +134,7 @@ const TripPlanner = () => {
                 <Td>{trip.trip_id}</Td>
                 <Td>
                     {trip.duration
-                        ? `${(trip.duration * 60).toFixed(0)} seconds`
+                        ? `${(trip.duration * 60).toFixed(0)} minutes`
                         : "N/A"}
                 </Td>
                 <Td>
@@ -161,6 +154,12 @@ const TripPlanner = () => {
 
     const totalResults = results.total_results || 0;
     const totalPages = Math.ceil(totalResults / 10);
+
+    // Extract data for Plotly graph
+    const tripDurations = results.trips_between_stops.map((trip) =>
+        (trip.duration * 60).toFixed(0)
+    );
+    const tripIds = results.trips_between_stops.map((trip) => trip.trip_id);
 
     return (
         <Box p={4}>
@@ -218,6 +217,27 @@ const TripPlanner = () => {
                         <Tbody>{renderTableRows()}</Tbody>
                     </Table>
 
+                    {/* Plotly chart for trip durations */}
+                    {tripDurations.length > 0 && (
+                        <Box mt={6}>
+                            <Plot
+                                data={[
+                                    {
+                                        x: tripIds,
+                                        y: tripDurations,
+                                        type: "bar",
+                                        marker: { color: "teal" },
+                                    },
+                                ]}
+                                layout={{
+                                    title: "Trip Durations",
+                                    xaxis: { title: "Trip ID" },
+                                    yaxis: { title: "Duration (minutes)" },
+                                }}
+                            />
+                        </Box>
+                    )}
+
                     {totalResults > 10 && (
                         <Box mt={4}>
                             <Button
@@ -240,6 +260,13 @@ const TripPlanner = () => {
                     )}
                 </>
             )}
+
+            {/* Close button */}
+            <VStack mt={4}>
+                <Button colorScheme="red" onClick={onClose}>
+                    Close
+                </Button>
+            </VStack>
         </Box>
     );
 };

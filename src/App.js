@@ -10,9 +10,24 @@ import {
     Grid,
     GridItem,
     Button,
+    useColorModeValue,
     VStack,
 } from "@chakra-ui/react";
-import { FaTachometerAlt } from "react-icons/fa";
+import {
+    FaTachometerAlt,
+    FaRoute,
+    FaBus,
+    FaMapMarkerAlt,
+    FaCalendarAlt,
+    FaChartLine,
+    FaClock,
+    FaMapSigns,
+    FaRulerHorizontal,
+    FaBalanceScale,
+    FaChartBar,
+} from "react-icons/fa";
+
+// import { FaTachometerAlt } from "react-icons/fa";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import RoutesModal from "./components/RoutesModal";
@@ -26,6 +41,7 @@ import FastestSlowestRoutes from "./components/FastestSlowestRoutes";
 import ShortestLongestRoutes from "./components/ShortestLongestRoutes";
 import RouteEfficiency from "./components/RouteEfficiency";
 import TripStatsModal from "./components/TripStatsModal";
+import RouteStats from "./components/RouteStats";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -36,6 +52,11 @@ L.Icon.Default.mergeOptions({
 });
 
 function App() {
+    const bgColor = useColorModeValue("white", "gray.800");
+    const textColor = useColorModeValue("gray.800", "white");
+    const buttonBg = useColorModeValue("gray.100", "gray.700");
+    const buttonHoverBg = useColorModeValue("gray.200", "gray.600");
+
     const [currentTime, setCurrentTime] = useState(new Date());
     const [selectedCity, setSelectedCity] = useState("New York");
     const [dashboardData, setDashboardData] = useState({
@@ -57,6 +78,7 @@ function App() {
     const [slRoutes, setslRoutes] = useState(false);
     const [routeEfficiency, setrouteEfficiency] = useState(false);
     const [trip_stats, set_trip_stats] = useState(false);
+    const [route_stats,set_route_stats]=useState(false);
 
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
@@ -71,103 +93,96 @@ function App() {
 
     return (
         <Flex>
-            <Box w="16%" bg="gray.900" color="white" h="auto" p={4}>
-                <Heading size="md" mb={4}>
+            <Box
+                w="250px"
+                bg={bgColor}
+                boxShadow="lg"
+                h="100vh"
+                overflow="auto"
+            >
+                {/* <Heading size="lg" mb={8} color={textColor}>
                     Dashboard
-                </Heading>
-                <VStack align="start" spacing={4}>
-                    <Flex align="center">
-                        <Icon as={FaTachometerAlt} mr={2} />
-                        <Text>Overview</Text>
-                    </Flex>
-                    <Button
-                        onClick={() => setIsRoutesModalOpen(true)}
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        View Routes
-                    </Button>
-                    <Button
-                        onClick={() => setIsTripsModalOpen(true)} // Open TripsModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        View Trips
-                    </Button>
-                    <Button
-                        onClick={() => setIsStopsModalOpen(true)} // Open StopsModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        View Stops
-                    </Button>
-                    <Button
-                        onClick={() => setIsCalendarDatesModalOpen(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        View Calendar Dates
-                    </Button>
-                    <Button
-                        onClick={() => setFrequentRoutes(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Frequent Routes
-                    </Button>
-                    <Button
-                        onClick={() => setPeak_hour_traffic(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Peak Hour Traffic
-                    </Button>
-                    <Button
-                        onClick={() => set_trip_planner(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Trip Planner
-                    </Button>
-                    <Button
-                        onClick={() => setfsRoutes(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Fastest and Slowest Routes
-                    </Button>
-                    <Button
-                        onClick={() => setslRoutes(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Shortest & Longest Routes
-                    </Button>
-                    <Button
-                        onClick={() => setrouteEfficiency(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Route Efficiency
-                    </Button>
-                    <Button
-                        onClick={() => set_trip_stats(true)} // Open CalendarDatesModal
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Trip Stats
-                    </Button>
+                </Heading> */}
+
+                <Text fontSize="2xl" fontWeight="bold" p={4}>
+                    Dashboard
+                </Text>
+                <VStack align="stretch">
+                    {[
+                        {
+                            icon: FaRoute,
+                            text: "View Routes",
+                            onClick: () => setIsRoutesModalOpen(true),
+                        },
+                        {
+                            icon: FaBus,
+                            text: "View Trips",
+                            onClick: () => setIsTripsModalOpen(true),
+                        },
+                        {
+                            icon: FaMapMarkerAlt,
+                            text: "View Stops",
+                            onClick: () => setIsStopsModalOpen(true),
+                        },
+                        {
+                            icon: FaCalendarAlt,
+                            text: "View Calendar Dates",
+                            onClick: () => setIsCalendarDatesModalOpen(true),
+                        },
+                        {
+                            icon: FaChartLine,
+                            text: "Frequent Routes",
+                            onClick: () => setFrequentRoutes(true),
+                        },
+                        {
+                            icon: FaClock,
+                            text: "Peak Hour Traffic",
+                            onClick: () => setPeak_hour_traffic(true),
+                        },
+                        {
+                            icon: FaMapSigns,
+                            text: "Trip Planner",
+                            onClick: () => set_trip_planner(true),
+                        },
+                        {
+                            icon: FaBus,
+                            text: "Fastest/Slowest Routes",
+                            onClick: () => setfsRoutes(true),
+                        },
+                        {
+                            icon: FaRulerHorizontal,
+                            text: "Shortest/Longest Routes",
+                            onClick: () => setslRoutes(true),
+                        },
+                        {
+                            icon: FaBalanceScale,
+                            text: "Route Efficiency",
+                            onClick: () => setrouteEfficiency(true),
+                        },
+                        {
+                            icon: FaChartBar,
+                            text: "Trip Stats",
+                            onClick: () => set_trip_stats(true),
+                        },
+                        {
+                            icon: FaChartLine,
+                            text: "Route Stats",
+                            onClick: () => set_route_stats(true),
+                        },
+                    ].map((item, index) => (
+                        <Button
+                            key={index}
+                            leftIcon={<Icon as={item.icon} />}
+                            onClick={item.onClick}
+                            justifyContent="flex-start"
+                            // variant="ghost"
+                            _hover={{ bg: buttonHoverBg }}
+                            w="auto"
+                            color={textColor}
+                        >
+                            {item.text}
+                        </Button>
+                    ))}
                 </VStack>
             </Box>
             <Box w="84%" p={6}>
@@ -288,9 +303,13 @@ function App() {
                         onClose={() => setrouteEfficiency(false)}
                     />
                 )}
-                {/* Route Efficiency */}
+                {/* Trip Stats */}
                 {trip_stats && (
                     <TripStatsModal onClose={() => setrouteEfficiency(false)} />
+                )}
+                {/* Route Stats */}
+                {route_stats && (
+                    <RouteStats onClose={() => set_route_stats(false)} />
                 )}
             </Box>
         </Flex>

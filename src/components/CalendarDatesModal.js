@@ -13,8 +13,10 @@ import {
     Flex,
     VStack,
 } from '@chakra-ui/react';
+import { useConfig } from "../configContext";
 
 const CalendarDatesModal = ({ onClose }) => {
+    const { baseURL } = useConfig();
     const [calendarDates, setCalendarDates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const calendarDatesPerPage = 10;
@@ -24,7 +26,7 @@ const CalendarDatesModal = ({ onClose }) => {
     useEffect(() => {
         const fetchCalendarDates = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/calendar_dates');
+                const response = await axios.get(`${baseURL}/calendar_dates`);
                 if (response.status === 200) {
                     setCalendarDates(response.data);
                 } else {

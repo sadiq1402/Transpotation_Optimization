@@ -209,6 +209,12 @@ def get_route_stats():
 
     # Compute route_stats for the specific date
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
+    cols_round_off = ['mean_headway', 'mean_trip_distance', 'mean_trip_duration', 'service_distance', 'service_duration', 'service_speed']
+    route_stats[cols_round_off] = route_stats[cols_round_off].round(2)
+    route_stats['mean_trip_duration'] = route_stats['mean_trip_duration'] * 60
+    route_stats['service_duration'] = route_stats['service_duration'] * 60
+    route_stats[['mean_headway', 'min_headway', 'max_headway']].fillna(0, inplace=True)
+    route_stats.fillna('NA',  inplace=True)
     route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']], on='route_id', how='left')
 
     # Convert route_stats DataFrame to JSON and return it
@@ -272,14 +278,19 @@ def get_trip_stats():
         'speed': ['mean', 'min', 'max'] 
     }).reset_index()
 
+    trip_duration_cols = ['mean_duration', 'min_duration', 'max_duration', 'mean_speed', 'min_speed', 'max_speed']
+    trip_period_cols = ['mean_duration', 'min_duration', 'max_duration', 'mean_speed', 'min_speed', 'max_speed']
 
+    
     # Convert analysis DataFrame to JSON
     trip_duration_analysis.columns = ['time_of_day', 'num_trips', 'mean_duration', 'min_duration', 'max_duration',
                                       'mean_speed', 'min_speed', 'max_speed']
+    trip_duration_analysis[trip_duration_cols] = trip_duration_analysis[trip_duration_cols].round(2)
     trip_duration_analysis_json = trip_duration_analysis.to_dict(orient='records')
 
     trip_period_analysis.columns = ['period_time', 'num_trips', 'mean_duration', 'min_duration', 'max_duration',
                                       'mean_speed', 'min_speed', 'max_speed']
+    trip_period_analysis[trip_period_cols] = trip_period_analysis[trip_period_cols].round(2)
     trip_period_analysis_json = trip_period_analysis.to_dict(orient='records')
     
     return jsonify({'trip_duration_analysis': trip_duration_analysis_json, 
@@ -326,6 +337,7 @@ def get_shortest_longest_routes():
     trip_stats = feed.compute_trip_stats()
 
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
+    route_stats['mean_trip_distance'] = route_stats['mean_trip_distance'].round(2)
     route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']],on='route_id', how='left')
 
     shortest_routes = route_stats.sort_values(by='mean_trip_distance').head(10)
@@ -347,11 +359,16 @@ def get_slowest_fastest_routes():
     trip_stats = feed.compute_trip_stats()
 
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
+    route_stats['service_speed'] = route_stats['service_speed'].round(2)
     route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']])
 
-    slowest_fastest_routes = route_stats.sort_values(by='service_speed')
+    slowest_routes = route_stats.sort_values(by='service_speed').head(10)
+    fastest_routes = route_stats.sort_values(by='service_speed', ascending=False).head(10)
 
-    return jsonify({'slowest_fastest_routes': slowest_fastest_routes.to_dict(orient='records')}), 200
+    return jsonify({
+        'slowest_routes': slowest_routes.to_dict(orient='records'),
+        'fastest_routes': fastest_routes.to_dict(orient='records')
+    }), 200
 
 
 @app.route('/api/peak_hour_traffic',  methods=['GET'])

@@ -12,8 +12,10 @@ import {
     Text,
     Flex,
 } from '@chakra-ui/react';
+import { useConfig } from "../configContext";
 
 function StopsModal({ onClose }) {
+    const { baseURL } = useConfig();
     const [stopsData, setStopsData] = useState([]); // Initialize as empty array
     const [currentPage, setCurrentPage] = useState(1); // Track the current page
     const stopsPerPage = 10; // Number of stops per page
@@ -22,7 +24,7 @@ function StopsModal({ onClose }) {
     useEffect(() => {
         const fetchStopsData = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/stops');
+                const response = await axios.get(`${baseURL}/stops`);
                 setStopsData(response.data);
             } catch (error) {
                 console.error("Error fetching stops data:", error);
