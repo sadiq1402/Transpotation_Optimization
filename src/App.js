@@ -24,6 +24,8 @@ import PeakHourTraffic from "./components/PeakHourTraffic";
 import TripPlanner from "./components/TripPlanner";
 import FastestSlowestRoutes from "./components/FastestSlowestRoutes";
 import ShortestLongestRoutes from "./components/ShortestLongestRoutes";
+import RouteEfficiency from "./components/RouteEfficiency";
+import TripStatsModal from "./components/TripStatsModal";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -53,6 +55,8 @@ function App() {
     const [trip_planner, set_trip_planner] = useState(false);
     const [fsRoutes, setfsRoutes] = useState(false);
     const [slRoutes, setslRoutes] = useState(false);
+    const [routeEfficiency, setrouteEfficiency] = useState(false);
+    const [trip_stats, set_trip_stats] = useState(false);
 
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
@@ -76,14 +80,6 @@ function App() {
                         <Icon as={FaTachometerAlt} mr={2} />
                         <Text>Overview</Text>
                     </Flex>
-                    <Button
-                        onClick={() => setActiveView("overview")}
-                        colorScheme="blue"
-                        size="sm"
-                        mt={2}
-                    >
-                        Fetch Delay Distribution
-                    </Button>
                     <Button
                         onClick={() => setIsRoutesModalOpen(true)}
                         colorScheme="blue"
@@ -155,6 +151,22 @@ function App() {
                         mt={2}
                     >
                         Shortest & Longest Routes
+                    </Button>
+                    <Button
+                        onClick={() => setrouteEfficiency(true)} // Open CalendarDatesModal
+                        colorScheme="blue"
+                        size="sm"
+                        mt={2}
+                    >
+                        Route Efficiency
+                    </Button>
+                    <Button
+                        onClick={() => set_trip_stats(true)} // Open CalendarDatesModal
+                        colorScheme="blue"
+                        size="sm"
+                        mt={2}
+                    >
+                        Trip Stats
                     </Button>
                 </VStack>
             </Box>
@@ -269,6 +281,16 @@ function App() {
                 {/* Shortest Longest Routes */}
                 {slRoutes && (
                     <ShortestLongestRoutes onClose={() => setslRoutes(false)} />
+                )}
+                {/* Route Efficiency */}
+                {routeEfficiency && (
+                    <RouteEfficiency
+                        onClose={() => setrouteEfficiency(false)}
+                    />
+                )}
+                {/* Route Efficiency */}
+                {trip_stats && (
+                    <TripStatsModal onClose={() => setrouteEfficiency(false)} />
                 )}
             </Box>
         </Flex>
