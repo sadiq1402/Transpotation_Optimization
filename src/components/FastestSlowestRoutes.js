@@ -124,14 +124,14 @@ function FastestSlowestRoutes({ onClose }) {
             y: currentFastestRoutes.map(route => route.service_speed),
             type: 'bar',
             name: 'Fastest Routes',
-            marker: { color: 'blue' },
+            marker: { color: '5463FF' },
         },
         slowest: {
             x: currentSlowestRoutes.map(route => route.route_long_name),
             y: currentSlowestRoutes.map(route => route.service_speed),
             type: 'bar',
             name: 'Slowest Routes',
-            marker: { color: 'red' },
+            marker: { color: 'FF5656' },
         },
     };
 

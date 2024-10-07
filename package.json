@@ -15,6 +15,7 @@
     "@web3-react/core": "^8.2.3",
     "@web3-react/injected-connector": "^6.0.7",
     "axios": "^1.7.7",
+    "chakra-react-select": "^4.9.2",
     "framer-motion": "^11.5.6",
     "leaflet": "^1.9.4",
     "plotly.js": "^2.35.2",
