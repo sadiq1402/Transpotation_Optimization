@@ -22,6 +22,8 @@ import CalendarDatesModal from "./components/CalendarDatesModal"; // Import Cale
 import FrequentRoutesModal from "./components/FrequentRoutesModal";
 import PeakHourTraffic from "./components/PeakHourTraffic";
 import TripPlanner from "./components/TripPlanner";
+import FastestSlowestRoutes from "./components/FastestSlowestRoutes";
+import ShortestLongestRoutes from "./components/ShortestLongestRoutes";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -49,6 +51,8 @@ function App() {
     const [frequentRoutes, setFrequentRoutes] = useState();
     const [peak_hour_traffic, setPeak_hour_traffic] = useState(false);
     const [trip_planner, set_trip_planner] = useState(false);
+    const [fsRoutes, setfsRoutes] = useState(false);
+    const [slRoutes, setslRoutes] = useState(false);
 
     const cityCoordinates = {
         "New York": [40.7128, -74.006],
@@ -74,7 +78,7 @@ function App() {
                     </Flex>
                     <Button
                         onClick={() => setActiveView("overview")}
-                        colorScheme="teal"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -90,7 +94,7 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => setIsTripsModalOpen(true)} // Open TripsModal
-                        colorScheme="green"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -98,7 +102,7 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => setIsStopsModalOpen(true)} // Open StopsModal
-                        colorScheme="purple"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -106,7 +110,7 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => setIsCalendarDatesModalOpen(true)} // Open CalendarDatesModal
-                        colorScheme="orange"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -114,7 +118,7 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => setFrequentRoutes(true)} // Open CalendarDatesModal
-                        colorScheme="orange"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -122,7 +126,7 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => setPeak_hour_traffic(true)} // Open CalendarDatesModal
-                        colorScheme="orange"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
@@ -130,11 +134,27 @@ function App() {
                     </Button>
                     <Button
                         onClick={() => set_trip_planner(true)} // Open CalendarDatesModal
-                        colorScheme="orange"
+                        colorScheme="blue"
                         size="sm"
                         mt={2}
                     >
                         Trip Planner
+                    </Button>
+                    <Button
+                        onClick={() => setfsRoutes(true)} // Open CalendarDatesModal
+                        colorScheme="blue"
+                        size="sm"
+                        mt={2}
+                    >
+                        Fastest and Slowest Routes
+                    </Button>
+                    <Button
+                        onClick={() => setslRoutes(true)} // Open CalendarDatesModal
+                        colorScheme="blue"
+                        size="sm"
+                        mt={2}
+                    >
+                        Shortest & Longest Routes
                     </Button>
                 </VStack>
             </Box>
@@ -238,8 +258,17 @@ function App() {
                         onClose={() => setPeak_hour_traffic(false)}
                     /> // Pass onClose handler
                 )}
+                {/* Trip Planner */}
                 {trip_planner && (
                     <TripPlanner onClose={() => set_trip_planner(false)} /> // Pass onClose handler
+                )}
+                {/* Fastest Slowest Routes */}
+                {fsRoutes && (
+                    <FastestSlowestRoutes onClose={() => setfsRoutes(false)} />
+                )}
+                {/* Shortest Longest Routes */}
+                {slRoutes && (
+                    <ShortestLongestRoutes onClose={() => setslRoutes(false)} />
                 )}
             </Box>
         </Flex>

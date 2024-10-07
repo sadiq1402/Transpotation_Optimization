@@ -326,7 +326,7 @@ def get_shortest_longest_routes():
     trip_stats = feed.compute_trip_stats()
 
     route_stats = feed.compute_route_stats(trip_stats, dates=[date])
-    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']])
+    route_stats = route_stats.merge(feed.routes[['route_id', 'route_long_name', 'route_color']],on='route_id', how='left')
 
     shortest_routes = route_stats.sort_values(by='mean_trip_distance').head(10)
     longest_routes = route_stats.sort_values(by='mean_trip_distance', ascending=False).head(10)
